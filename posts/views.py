@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, render, reverse
 from django.views import View
@@ -32,38 +33,25 @@ def user_detail_view(request, user_id):
     return render(request, template_name, context)
 
 
-@login_required
-def create_post_view(request):
+class CreatePostView(LoginRequiredMixin, View):
     template_name = "generic_form.html"
-    form = PostForm()
+    form_class = PostForm
+    initial = {'key': 'value'}
 
-    if request.method == "POST":
-        form = PostForm(request.POST)
+    def get(self, request, *args, **kwargs):
+        form = self.form_class(initial=self.initial)
+        return render(request, self.template_name, {"form": form, "header": "Create a Post"})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             post = Post.objects.create(body=data.get("body"), creator=request.user)
             return redirect(reverse("post_detail", args=(post.id,)))
-
-    return render(request, template_name, {"form": form, "header": "Create a Post"})
-
-
-def signup_view(request):
-    template_name = "generic_form.html"
-    form = LoginForm()
-
-    if request.method == "POST":
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            data = form.cleaned_data
-            user = User.objects.create_user(
-                username=data.get("username"), password=data.get("password")
-            )
-            login(request, user)
-            return redirect(reverse("homepage"))
-    return render(request, template_name, {"form": form, "header": "Signup"})
+        return render(request, self.template_name, {"form": form, "header": "Create a Post"})
 
 
-class signup_view(View):
+class SignUpView(View):
     template_name = "generic_form.html"
     form_class = LoginForm
     initial = {'key': 'value'}
@@ -86,12 +74,18 @@ class signup_view(View):
         return render(request, self.template_name, {"form": form, "header": "Signup"})
 
 
-def login_view(request):
+class LogInView(View):
     template_name = "generic_form.html"
-    form = SignupForm()
+    form_class = SignupForm
+    initial = {'key': 'value'}
 
-    if request.method == "POST":
-        form = SignupForm(request.POST)
+    def get(self, request, *args, **kwargs):
+        form = self.form_class(initial=self.initial)
+        return render(request, self.template_name, {"form": form, "header": "Login"})
+
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             user = authenticate(
@@ -100,7 +94,8 @@ def login_view(request):
             if user:
                 login(request, user)
                 return redirect(request.GET.get("next", "/"))
-    return render(request, template_name, {"form": form, "header": "Login"})
+
+        return render(request, self.template_name, {"form": form, "header": "Login"})
 
 
 def logout_view(request):
