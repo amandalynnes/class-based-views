@@ -1,3 +1,9 @@
+<!-- 
+Resources:
+https://docs.djangoproject.com/en/3.1/topics/class-based-views/intro/
+ -->
+
+
 # class-based-views
 
 In Django, we've been purely focused on working with function-based views -- frankly, because they're easy and they get the job done. But sometimes we need to eke just a little more functionality out a view... especially if we need to be able to take in different methods (GET, POST, etc.). We can do that inside of a function, but what if there was a way to make it cleaner and easier to understand?

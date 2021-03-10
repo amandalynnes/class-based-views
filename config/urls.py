@@ -25,6 +25,7 @@ urlpatterns = [
     path("user/<int:user_id>/", views.user_detail_view, name="homepage"),
     path("logout/", views.logout_view, name="logout"),
     path("login/", views.login_view, name="login"),
-    path("signup/", views.signup_view, name="signup"),
+    # path("signup/", views.signup_view, name="signup"),
+    path("signup/", views.signup_view.as_view(), name="signup"),
     path("post/create/", views.create_post_view, name="create"),
 ]

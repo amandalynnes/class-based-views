@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, render, reverse
+from django.views import View
 
 from posts.forms import LoginForm, PostForm, SignupForm
 from posts.models import Post
@@ -60,6 +61,29 @@ def signup_view(request):
             login(request, user)
             return redirect(reverse("homepage"))
     return render(request, template_name, {"form": form, "header": "Signup"})
+
+
+class signup_view(View):
+    template_name = "generic_form.html"
+    form_class = LoginForm
+    initial = {'key': 'value'}
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class(initial=self.initial)
+        return render(request, self.template_name, {"form": form, "header": "Signup"})
+
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            user = User.objects.create_user(
+                username=data.get("username"), password=data.get("password")
+            )
+            login(request, user)
+            return redirect(reverse("homepage"))
+
+        return render(request, self.template_name, {"form": form, "header": "Signup"})
 
 
 def login_view(request):
