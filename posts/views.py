@@ -25,12 +25,13 @@ def post_detail_view(request, post_id):
     return render(request, template_name, context)
 
 
-def user_detail_view(request, user_id):
-    template_name = "user_detail.html"
-    target_user = User.objects.get(id=user_id)
-    posts = Post.objects.filter(creator=target_user)
-    context = {"posts": posts, "target_user": target_user}
-    return render(request, template_name, context)
+class UserDetailView(View):
+    def get(self, request, user_id, *args, **kwargs):
+        template_name = "user_detail.html"
+        target_user = User.objects.get(id=user_id)
+        posts = Post.objects.filter(creator=target_user)
+        context = {"posts": posts, "target_user": target_user}
+        return render(request, template_name, context)
 
 
 class CreatePostView(LoginRequiredMixin, View):
